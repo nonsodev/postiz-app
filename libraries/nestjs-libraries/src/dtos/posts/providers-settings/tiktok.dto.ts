@@ -77,6 +77,9 @@ export class TikTokDto {
   })
   title: string;
 
+  // TikTok's audit UX rules forbid preselecting privacy, so the composer starts
+  // it empty; only DIRECT_POST needs it (UPLOAD ignores it).
+  @ValidateIf((p) => p.content_posting_method !== 'UPLOAD')
   @IsIn([
     'PUBLIC_TO_EVERYONE',
     'MUTUAL_FOLLOW_FRIENDS',

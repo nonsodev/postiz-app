@@ -438,6 +438,35 @@ export class TiktokProvider extends SocialAbstract implements SocialProvider {
     };
   }
 
+  // Feeds the composer what TikTok's Content Sharing UX guidelines require it to
+  // show: the creator's nickname, the privacy options this creator actually has,
+  // which interactions they disabled, and the max video duration.
+  async creatorInfo(accessToken: string) {
+    const { data } = await (
+      await fetch(
+        'https://open.tiktokapis.com/v2/post/publish/creator_info/query/',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json; charset=UTF-8',
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      )
+    ).json();
+
+    return {
+      nickname: data?.creator_nickname,
+      username: data?.creator_username,
+      avatar: data?.creator_avatar_url,
+      privacyLevelOptions: data?.privacy_level_options || [],
+      commentDisabled: !!data?.comment_disabled,
+      duetDisabled: !!data?.duet_disabled,
+      stitchDisabled: !!data?.stitch_disabled,
+      maxVideoPostDurationSec: data?.max_video_post_duration_sec,
+    };
+  }
+
   // Single status check for a publish_id, no loops and no timers: `post` returns
   // a `pending` PostResponse right after the upload, and the post workflow polls
   // this method with durable timers, so a stuck/retried check can never re-run
